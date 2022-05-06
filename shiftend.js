@@ -53,7 +53,7 @@ function displaySwitchInputOption(switchInput) {
     multiselect.querySelector(".multiselect__content-wrapper").style.display = "block";
 }
 
-async function chooseSwitchInputOption(switchInput, optionText) {
+async function selectSwitchInputOption(switchInput, optionText) {
     displaySwitchInputOption(switchInput);
 
     let options = switchInput
@@ -93,8 +93,21 @@ async function fillAllBackLogFields() {
 
     for (switchInput of switchInputs) {
         try {
-            await chooseSwitchInputOption(switchInput, "Khác");
+            await selectSwitchInputOption(switchInput, "Khác");
             await fillSwitchInputValue(switchInput, REASON);
+            await delay(300);
+
+        } catch (e) {
+            log("Bỏ qua một trường");
+        }
+    }
+}
+
+async function verifyAllLayoutFields() {
+    const switchInputs = verifyLayoutTab.getElementsByClassName("switch-input");
+    for (switchInput of switchInputs) {
+        try {
+            await selectSwitchInputOption(switchInput, "Đạt");
             await delay(300);
 
         } catch (e) {
@@ -112,6 +125,11 @@ async function task() {
 
     await fillAllBackLogFields();
     await delay(500);
+
+    await verifyAllLayoutFields();
+    await delay(500)
+
+    alert("Xong!");
 }
 
 task();
