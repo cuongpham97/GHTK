@@ -108,6 +108,7 @@ async function verifyAllLayoutFields() {
     for (switchInput of switchInputs) {
         try {
             await selectSwitchInputOption(switchInput, "Đạt");
+            await createElementEvent(switchInput, 'focusout');
             await delay(300);
 
         } catch (e) {
