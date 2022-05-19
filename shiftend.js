@@ -1,6 +1,6 @@
 const REASON = "Đang xử lí";
-const backLogTab = document.querySelector("#__BVID__23");
-const verifyLayoutTab = document.querySelector("#__BVID__38");
+const backLogTab = document.querySelector(".back-log").parentNode;
+const verifyLayoutTab = document.querySelector(".verify-layout").parentNode;
 
 async function delay(time) {
     return new Promise((resolve, _reject) => {
