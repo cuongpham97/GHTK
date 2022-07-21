@@ -31,7 +31,7 @@ async function displayAllBackLogFields() {
             loadMoreLink.click();
             await delay(500);
         }
-    } while (loadMoreLink);
+    } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
 }
 
 async function createElementEvent(element, event) {
