@@ -27,7 +27,7 @@ async function displayAllBackLogFields() {
 
     do {
         loadMoreLink = backLogTab.querySelector('a[href="javascript:void(0)"]');
-        if (loadMoreLink && loadMoreLink.style.visibility !== 'hidden') {
+        if (loadMoreLink && loadMoreLink.style.visibility == 'visible') {
             loadMoreLink.click();
             await delay(500);
         }
