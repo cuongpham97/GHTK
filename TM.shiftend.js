@@ -20,7 +20,7 @@ async function displayAllBackLogFields() {
         loadMoreLink = backLogTab.querySelector('a[href="javascript:void(0)"]');
         if (loadMoreLink) {
             loadMoreLink.click();
-            await delay(1000);
+            await delay(500);
         }
     } while (loadMoreLink);
 }
