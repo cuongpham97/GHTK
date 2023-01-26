@@ -1,4 +1,3 @@
-const REASON = "Đang xử lí";
 const backLogTab = document.querySelector(".back-log").parentNode;
 
 async function delay(time) {
@@ -7,10 +6,6 @@ async function delay(time) {
             resolve();
         }, time);
     });
-}
-
-function log(text) {
-    console.log(text);
 }
 
 async function openAllCollapses() {
