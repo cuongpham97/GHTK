@@ -111,6 +111,7 @@ async function fillBackLogReasons() {
 async function task() {
   await showAllBackLogCollapses();
   await fillBackLogReasons();
+  alert('Xong!');
 }
 
 task();
