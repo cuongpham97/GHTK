@@ -34,7 +34,7 @@ async function displayAllInputFields(parentElement) {
 
     if (loadMoreLink) {
       await loadMoreLink.click();
-      await delay(300);
+      await delay(1000);
     }
   } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
 }
