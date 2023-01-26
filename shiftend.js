@@ -34,7 +34,7 @@ async function displayAllInputFields(parentElement) {
 
     if (loadMoreLink) {
       await loadMoreLink.click();
-      await delay(800);
+      await delay(300);
     }
   } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
 }
@@ -57,6 +57,10 @@ async function showAllBackLogCollapses() {
 async function changeSwitchInputValue(input, text) {
   // Display options
   const multiselect = input.querySelector('.multiselect');
+  if (!multiselect) {
+    console.log('Bỏ qua 1 trường');
+    return;
+  }
 
   multiselect.className = 'multiselect multiselect--active in-valid';
   multiselect.querySelector('.multiselect__tags').querySelector('.multiselect__input').style = 'width: 100%;';
@@ -97,7 +101,7 @@ async function fillBackLogReasons() {
 
   for (input of switchInputs) {
     let reason = REASON['all'];
-      
+
     //TODO:
 
     await changeSwitchInputValue(input, reason);
