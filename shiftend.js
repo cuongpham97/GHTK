@@ -1,136 +1,112 @@
-const REASON = "Đang xử lí";
-const backLogTab = document.querySelector(".back-log").parentNode;
-const verifyLayoutTab = document.querySelector(".verify-layout").parentNode;
+const REASON = {
+  'all': 'Đang chờ xuất'
+  // 'tồn >1 ngày': 'Thiếu hàng trong phiên kiểm bao',
+  // 'tồn >2 ngày': 'Thiếu hàng trong phiên kiểm bao',
+  // 'tồn >3 ngày': 'Thiếu hàng trong phiên kiểm bao'
+};
+
+function createElementEvent(element, event) {
+  return new Promise((resolve, _reject) => {
+    element.addEventListener(event, () => {
+      resolve(true);
+    });
+
+    element.dispatchEvent(new Event(event));
+  });
+}
 
 async function delay(time) {
-    return new Promise((resolve, _reject) => {
-        setTimeout(() => {
-            resolve();
-        }, time);
-    });
+  return new Promise((resolve, _reject) => {
+    setTimeout(() => {
+      resolve();
+    }, time);
+  });
 }
 
-function log(text) {
-    console.log(text);
+function openMenuCollapse(element) {
+  element.classList.add("show");
+  element.style.display = "block";
 }
 
-async function openAllCollapse() {
-    backLogTab.classList.add("show");
-    backLogTab.style.display = "block";
+async function displayAllInputFields(parentElement) {
+  do {
+    var loadMoreLink = parentElement.querySelector('a[href="javascript:void(0)"]');
 
-    verifyLayoutTab.classList.add("show");
-    verifyLayoutTab.style.display = "block";
-}
-
-async function displayAllBackLogFields() {
-    let loadMoreLink;
-
-    do {
-        loadMoreLink = backLogTab.querySelector('a[href="javascript:void(0)"]');
-        if (loadMoreLink) {
-            loadMoreLink.click();
-            await delay(500);
-        }
-    } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
-}
-
-async function createElementEvent(element, event) {
-    return new Promise((resolve, _reject) => {
-        element.addEventListener(event, () => {
-            resolve(true);
-        });
-
-        element.dispatchEvent(new Event(event));
-    });
-}
-
-function displaySwitchInputOption(switchInput) {
-    let multiselect = switchInput.querySelector(".multiselect");
-
-    multiselect.className = "multiselect multiselect--active in-valid";
-    multiselect.querySelector(".multiselect__tags").querySelector(".multiselect__input").style = "width: 100%;";
-    multiselect.querySelector(".multiselect__tags").querySelector(".multiselect__placeholder").remove();
-    multiselect.querySelector(".multiselect__content-wrapper").style.display = "block";
-}
-
-async function selectSwitchInputOption(switchInput, optionText) {
-    displaySwitchInputOption(switchInput);
-
-    let options = switchInput
-        .querySelector(".multiselect")
-        .querySelector(".multiselect__content-wrapper")
-        .querySelector(".multiselect__content").children;
-
-    for (option of options) {
-        if (option.textContent.trim() === optionText) {
-            return new Promise((resolve, _reject) => {
-                let elem = option.querySelector(".multiselect__option");
-
-                elem.addEventListener("click", () => resolve(true));
-                elem.click();
-            });
-        }
+    if (loadMoreLink) {
+      await loadMoreLink.click();
+      await delay(800);
     }
-
-    return Promise.resolve(false);
+  } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
 }
 
-async function fillSwitchInputValue(switchInput, text) {
-    let input = switchInput.querySelector(".inputReason");
+async function showAllBackLogCollapse() {
+  const backLog = document.querySelector(".back-log").parentNode;
+  openMenuCollapse(backLog);
 
-    await createElementEvent(input, "click");
-    await createElementEvent(input, "focus");
+  const children = [...backLog.querySelectorAll('[data-toggle="collapse"]')];
 
-    input.value = text;
+  await Promise.all(children.map(
+    e => e.nextElementSibling.classList.contains('show')
+      ? Promise.resolve()
+      : createElementEvent(e, 'click')
+  ));
 
-    await createElementEvent(input, "change");
-    await createElementEvent(input, "input");
-    await createElementEvent(input, "focusout");
+  await Promise.all(children.map(e => displayAllInputFields(e.nextElementSibling)));
 }
 
-async function fillAllBackLogFields() {
-    const switchInputs = backLogTab.getElementsByClassName("switch-input");
+async function changeSwitchInputValue(input, text) {
+  // Display options
+  const multiselect = input.querySelector('.multiselect');
 
-    for (switchInput of switchInputs) {
-        try {
-            await selectSwitchInputOption(switchInput, "Khác");
-            await fillSwitchInputValue(switchInput, REASON);
-            await delay(300);
+  multiselect.className = 'multiselect multiselect--active in-valid';
+  multiselect.querySelector('.multiselect__tags').querySelector('.multiselect__input').style = 'width: 100%;';
+  multiselect.querySelector('.multiselect__content-wrapper').style.display = 'block';
 
-        } catch (e) {
-            log("Bỏ qua một trường");
-        }
-    }
+  // Select option
+  const options = input.querySelectorAll('.multiselect__option');
+  const optionsText = [...options].map(o => o.textContent.trim());
+
+  if (optionsText.indexOf(text) !== -1 && text !== 'Khác') {
+    await createElementEvent(options[optionsText.indexOf(text)], 'click');
+
+    multiselect.querySelector('.multiselect__tags').querySelector('.multiselect__input').style = 'width: 0;';
+    multiselect.querySelector('.multiselect__content-wrapper').style.display = 'none';
+
+    await delay(300);
+
+    return;
+  }
+
+  index = optionsText.indexOf('Khác');
+  await createElementEvent(options[index], 'click');
+
+  const inputReason = input.querySelector(".inputReason");
+  await createElementEvent(inputReason, "click");
+  await createElementEvent(inputReason, "focus");
+  inputReason.value = text;
+  await createElementEvent(inputReason, "change");
+  await createElementEvent(inputReason, "input");
+  await createElementEvent(inputReason, "focusout");
+
+  await delay(300);
 }
 
-async function verifyAllLayoutFields() {
-    const switchInputs = verifyLayoutTab.getElementsByClassName("switch-input");
-    for (switchInput of switchInputs) {
-        try {
-            await selectSwitchInputOption(switchInput, "Đạt");
-            await createElementEvent(switchInput, 'focusout');
-            await delay(300);
+async function fillBackLogReasons() {
+  const backLog = document.querySelector(".back-log").parentNode;
+  const switchInputs = backLog.querySelectorAll('.switch-input');
 
-        } catch (e) {
-            log("Bỏ qua một trường");
-        }
-    }
+  for (input of switchInputs) {
+    let reason = REASON['all'];
+      
+    //TODO:
+
+    await changeSwitchInputValue(input, reason);
+  }
 }
 
 async function task() {
-    await openAllCollapse();
-    await delay(500);
-
-    await displayAllBackLogFields();
-    await delay(500);
-
-    await fillAllBackLogFields();
-    await delay(500);
-
-    await verifyAllLayoutFields();
-    await delay(500)
-
-    alert("Xong!");
+  await showAllBackLogCollapse();
+  await fillBackLogReasons();
 }
 
 task();
