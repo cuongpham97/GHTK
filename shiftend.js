@@ -39,7 +39,7 @@ async function displayAllInputFields(parentElement) {
   } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
 }
 
-async function showAllBackLogCollapse() {
+async function showAllBackLogCollapses() {
   const backLog = document.querySelector(".back-log").parentNode;
   openMenuCollapse(backLog);
 
@@ -105,7 +105,7 @@ async function fillBackLogReasons() {
 }
 
 async function task() {
-  await showAllBackLogCollapse();
+  await showAllBackLogCollapses();
   await fillBackLogReasons();
 }
 
