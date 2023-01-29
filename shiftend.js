@@ -1,8 +1,9 @@
 const REASON = {
-  'all': 'Đang chờ xuất'
-  // 'tồn >1 ngày': 'Thiếu hàng trong phiên kiểm bao',
-  // 'tồn >2 ngày': 'Thiếu hàng trong phiên kiểm bao',
-  // 'tồn >3 ngày': 'Thiếu hàng trong phiên kiểm bao'
+  'all': 'Đang chờ xuất',
+  'tồn >6h': 'Đang chờ xuất',
+  'tồn >1 ngày': 'Thiếu hàng trong phiên kiểm bao',
+  'tồn >2 ngày': 'Thiếu hàng trong phiên kiểm bao',
+  'tồn >3 ngày': 'Thiếu hàng trong phiên kiểm bao'
 };
 
 function createElementEvent(element, event) {
@@ -43,15 +44,17 @@ async function showAllBackLogCollapses() {
   const backLog = document.querySelector(".back-log").parentNode;
   openMenuCollapse(backLog);
 
-  const children = [...backLog.querySelectorAll('[data-toggle="collapse"]')];
+  const collapses = [...backLog.querySelectorAll('[data-toggle="collapse"]')];
 
-  await Promise.all(children.map(
+  await Promise.all(collapses.map(
     e => e.nextElementSibling.classList.contains('show')
       ? Promise.resolve()
       : createElementEvent(e, 'click')
   ));
 
-  await Promise.all(children.map(e => displayAllInputFields(e.nextElementSibling)));
+  for (e of collapses) {
+    await displayAllInputFields(e.nextElementSibling);
+  }
 }
 
 async function changeSwitchInputValue(input, text) {
@@ -100,17 +103,41 @@ async function fillBackLogReasons() {
   const switchInputs = backLog.querySelectorAll('.switch-input');
 
   for (input of switchInputs) {
-    let reason = REASON['all'];
+    let backLogHeader = input.parentNode.parentNode.parentNode.querySelector('.text-header').textContent;
 
-    //TODO:
+    let reason = REASON['all'];
+    for (let backLogTime in REASON) {
+      if (backLogHeader.includes(backLogTime)) {
+        reason = REASON[backLogTime];
+      }
+    }
 
     await changeSwitchInputValue(input, reason);
+  }
+}
+
+async function verifyLayouts() {
+  const verifyLayout = document.querySelector(".verify-layout").parentNode;
+  openMenuCollapse(verifyLayout);
+
+  const switchInputs = verifyLayout.getElementsByClassName("switch-input");
+  for (input of switchInputs) {
+    try {
+      await changeSwitchInputValue(input, "Đạt");
+      await createElementEvent(input, 'focusout');
+
+    } catch (e) {
+      log("Bỏ qua một trường");
+    }
   }
 }
 
 async function task() {
   await showAllBackLogCollapses();
   await fillBackLogReasons();
+
+  await verifyLayouts();
+
   alert('Xong!');
 }
 
