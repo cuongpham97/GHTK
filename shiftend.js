@@ -93,7 +93,6 @@ function getBackLogReason(destinationHeader, backLogHeader) {
   let reason = REASON_DEFAULT;
 
   for (const province in REASON_FOR_DESTINATION) {
-    console.log(destinationHeader.textContent, province, destinationHeader.textContent.includes(province));
     if (destinationHeader.textContent.includes(province)) {
       reason = REASON_FOR_DESTINATION[province];
     }
