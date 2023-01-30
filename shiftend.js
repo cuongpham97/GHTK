@@ -6,6 +6,7 @@ const REASON_FOR_BACK_LOG_TIME = {
   'tồn >3 ngày': 'Thiếu hàng trong phiên kiểm bao'
 };
 const REASON_FOR_DESTINATION = {
+  //'Đắk Nông': 'Chờ xuất ca sáng'
   'Đắk Lắk': 'Chờ xuất ca sáng'
 };
 
