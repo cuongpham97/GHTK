@@ -34,8 +34,7 @@ async function displayAllInputFields(parentElement) {
     var loadMoreLink = parentElement.querySelector('a[href="javascript:void(0)"]');
 
     if (loadMoreLink) {
-      await loadMoreLink.click();
-      await delay(1000);
+      await createElementEvent(loadMoreLink, 'click');
     }
   } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
 }
@@ -46,55 +45,43 @@ async function showAllBackLogCollapses() {
 
   const collapses = [...backLog.querySelectorAll('[data-toggle="collapse"]')];
 
-  await Promise.all(collapses.map(
-    e => e.nextElementSibling.classList.contains('show')
-      ? Promise.resolve()
-      : createElementEvent(e, 'click')
-  ));
-
   for (e of collapses) {
+    if (!e.nextElementSibling.classList.contains('show')) {
+      await createElementEvent(e, 'click');
+      await delay(300);
+    }
+
     await displayAllInputFields(e.nextElementSibling);
   }
 }
 
 async function changeSwitchInputValue(input, text) {
-  // Display options
   const multiselect = input.querySelector('.multiselect');
-  if (!multiselect) {
-    console.log('Bỏ qua 1 trường');
+  if (!multiselect || !multiselect.classList.contains('in-valid')) {
+    console.log('Bỏ qua một trường đã có giá trị', input);
+    
     return;
   }
 
-  multiselect.className = 'multiselect multiselect--active in-valid';
-  multiselect.querySelector('.multiselect__tags').querySelector('.multiselect__input').style = 'width: 100%;';
-  multiselect.querySelector('.multiselect__content-wrapper').style.display = 'block';
+  await createElementEvent(multiselect, 'focus');
 
-  // Select option
+  //Select option
   const options = input.querySelectorAll('.multiselect__option');
-  const optionsText = [...options].map(o => o.textContent.trim());
+  const optionsText = [...options].map(opt => opt.textContent.trim());
 
   if (optionsText.indexOf(text) !== -1 && text !== 'Khác') {
     await createElementEvent(options[optionsText.indexOf(text)], 'click');
-
-    multiselect.querySelector('.multiselect__tags').querySelector('.multiselect__input').style = 'width: 0;';
-    multiselect.querySelector('.multiselect__content-wrapper').style.display = 'none';
-
     await delay(300);
 
     return;
   }
 
-  index = optionsText.indexOf('Khác');
-  await createElementEvent(options[index], 'click');
+  await createElementEvent(options[optionsText.indexOf('Khác')], 'click');
 
   const inputReason = input.querySelector(".inputReason");
-  await createElementEvent(inputReason, "click");
-  await createElementEvent(inputReason, "focus");
   inputReason.value = text;
-  await createElementEvent(inputReason, "change");
   await createElementEvent(inputReason, "input");
   await createElementEvent(inputReason, "focusout");
-
   await delay(300);
 }
 
@@ -122,20 +109,14 @@ async function verifyLayouts() {
 
   const switchInputs = verifyLayout.getElementsByClassName("switch-input");
   for (input of switchInputs) {
-    try {
-      await changeSwitchInputValue(input, "Đạt");
-      await createElementEvent(input, 'focusout');
-
-    } catch (e) {
-      log("Bỏ qua một trường");
-    }
+    await changeSwitchInputValue(input, "Đạt");
   }
 }
 
 async function task() {
   await showAllBackLogCollapses();
   await fillBackLogReasons();
-
+  
   await verifyLayouts();
 
   alert('Xong!');
