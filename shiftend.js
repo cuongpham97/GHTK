@@ -1,4 +1,4 @@
-const REASON_DEFAULT = 'Đang xử lí';
+const REASON_DEFAULT = 'Đang chờ xuất';
 const REASON_FOR_BACK_LOG_TIME = {
   //'tồn >6h': 'Đang chờ xuất',
   'tồn >1 ngày': 'Thiếu hàng trong phiên kiểm bao',
@@ -7,7 +7,7 @@ const REASON_FOR_BACK_LOG_TIME = {
 };
 const REASON_FOR_DESTINATION = {
   //'Đắk Nông': 'Chờ xuất ca sáng'
-  'Đắk Lắk': 'Chờ xuất ca sáng'
+  'Đắk Lắk': 'Đang chờ xuất'
 };
 
 function createElementEvent(element, event) {
