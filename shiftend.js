@@ -1,9 +1,12 @@
-const REASON = {
-  'all': 'Đang chờ xuất',
-  'tồn >6h': 'Đang chờ xuất',
+const REASON_DEFAULT = 'Đang xử lí';
+const REASON_FOR_BACK_LOG_TIME = {
+  //'tồn >6h': 'Đang chờ xuất',
   'tồn >1 ngày': 'Thiếu hàng trong phiên kiểm bao',
   'tồn >2 ngày': 'Thiếu hàng trong phiên kiểm bao',
   'tồn >3 ngày': 'Thiếu hàng trong phiên kiểm bao'
+};
+const REASON_FOR_DESTINATION = {
+  'Đắk Lắk': 'Chờ xuất ca sáng'
 };
 
 function createElementEvent(element, event) {
@@ -35,6 +38,7 @@ async function displayAllInputFields(parentElement) {
 
     if (loadMoreLink) {
       await createElementEvent(loadMoreLink, 'click');
+      await delay(500);
     }
   } while (loadMoreLink && loadMoreLink.style.visibility == 'visible');
 }
@@ -45,7 +49,7 @@ async function showAllBackLogCollapses() {
 
   const collapses = [...backLog.querySelectorAll('[data-toggle="collapse"]')];
 
-  for (e of collapses) {
+  for (const e of collapses) {
     if (!e.nextElementSibling.classList.contains('show')) {
       await createElementEvent(e, 'click');
       await delay(300);
@@ -85,21 +89,40 @@ async function changeSwitchInputValue(input, text) {
   await delay(300);
 }
 
+function getBackLogReason(destinationHeader, backLogHeader) {
+  let reason = REASON_DEFAULT;
+
+  for (const province in REASON_FOR_DESTINATION) {
+    console.log(destinationHeader.textContent, province, destinationHeader.textContent.includes(province));
+    if (destinationHeader.textContent.includes(province)) {
+      reason = REASON_FOR_DESTINATION[province];
+    }
+  }
+
+  for (const backLogTime in REASON_FOR_BACK_LOG_TIME) {
+    if (backLogHeader.textContent.includes(backLogTime)) {
+      reason = REASON_FOR_BACK_LOG_TIME[backLogTime];
+    }
+  }
+
+  return reason;
+}
+
 async function fillBackLogReasons() {
   const backLog = document.querySelector(".back-log").parentNode;
-  const switchInputs = backLog.querySelectorAll('.switch-input');
+  const collapses = backLog.querySelectorAll('.collapse');
 
-  for (input of switchInputs) {
-    let backLogHeader = input.parentNode.parentNode.parentNode.querySelector('.text-header').textContent;
+  for (const collapse of collapses) {
+    const destinationHeader = collapse.previousElementSibling;
+    const tableRows = collapse.querySelectorAll('tr'); 
 
-    let reason = REASON['all'];
-    for (let backLogTime in REASON) {
-      if (backLogHeader.includes(backLogTime)) {
-        reason = REASON[backLogTime];
-      }
+    for (const row of tableRows) {
+      const backLogHeader = row.querySelector('.text-header');
+      const input = row.querySelector('.switch-input');
+
+      const reason = getBackLogReason(destinationHeader, backLogHeader);
+      await changeSwitchInputValue(input, reason);
     }
-
-    await changeSwitchInputValue(input, reason);
   }
 }
 
@@ -116,7 +139,7 @@ async function verifyLayouts() {
 async function task() {
   await showAllBackLogCollapses();
   await fillBackLogReasons();
-  
+
   await verifyLayouts();
 
   alert('Xong!');
