@@ -62,7 +62,7 @@ async function nextPage() {
   return null;
 }
 
-async function fillBackLog() {
+async function fillModalForm() {
   await waitElementAppear('.modal.fade.show');
   await delay(100);
 
@@ -88,7 +88,7 @@ async function task() {
       let btn = row.querySelector('.btn-success.w-100.ladda-button');
       await createEvent(btn, 'click');
 
-      await fillBackLog();
+      await fillModalForm();
       await delay(delayTime);
     }
   } while ((await nextPage()) !== null);
