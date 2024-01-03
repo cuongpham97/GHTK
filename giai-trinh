@@ -1,0 +1,97 @@
+//Cài đặt chome: settings -> experiments -> Show warning about Self-XSS when pasting code
+
+let reason = 'Sản lượng hàng tăng, nhân sự thiếu chưa bổ sung, LVCC tạo BTP nên kho quá tải';
+let delayTime = 200;
+
+function createEvent(element, event, opts) {
+  return new Promise((resolve, _reject) => {
+    element.addEventListener(event, function _handler() {
+      element.removeEventListener(event, _handler);
+      resolve(true);
+    });
+    element.dispatchEvent(new Event(event, opts));
+  });
+}
+
+async function waitLoadingCompleted() {
+  return new Promise(resolve => {
+    let interval = setInterval(() => {
+      if (!document.querySelector('.btn.btn-success.w-200px.ladda-button[disabled]')) {
+        clearInterval(interval);
+        resolve(true);
+      }
+    }, 200);
+  });
+}
+
+async function waitElementAppear(target) {
+  return new Promise(resolve => {
+    let interval = setInterval(() => {
+      if (document.querySelector(target)) {
+        clearInterval(interval);
+        resolve(true);
+      }
+    }, 100);
+  });
+}
+
+async function delay(time) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(true), time);
+  });
+}
+
+async function selectMaxPageSize() {
+  const maxPageSizeElem = document.querySelector('.d-inline-block.w-auto.custom-select.custom-select-sm');
+  maxPageSizeElem.value = 100;
+  await createEvent(maxPageSizeElem, 'change');
+}
+
+async function nextPage() {
+  let currentPage = +document.querySelector('.page-item.active a').textContent;
+  
+  for (let pageLink of document.querySelectorAll('.page-item a')) {
+    if (pageLink.textContent == currentPage + 1) {
+      await createEvent(pageLink, 'click');
+      await waitLoadingCompleted();
+       
+      return currentPage + 1;
+    }
+  }
+
+  return null;
+}
+
+async function fillBackLog() {
+  await waitElementAppear('.modal.fade.show');
+  await delay(100);
+
+  let modal = document.querySelector('.modal .modal-body');
+  let input = modal.querySelector('input');
+  let confirmBtn = modal.querySelector('button');
+  
+  input.value = reason;
+  await createEvent(input, 'change');
+  await createEvent(confirmBtn, 'click');
+
+  await waitElementAppear('.modal.fade[style*="display: none"]');
+}
+
+async function task() {
+  await selectMaxPageSize();
+  await waitLoadingCompleted();
+
+  do {
+    let rows = document.querySelectorAll('.penalty-row');
+    
+    for (let row of rows) {
+      let btn = row.querySelector('.btn-success.w-100.ladda-button');
+      await createEvent(btn, 'click');
+
+      await fillBackLog();
+      await delay(delayTime);
+    }
+  } while ((await nextPage()) !== null);
+}
+
+task();
