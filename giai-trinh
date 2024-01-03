@@ -1,4 +1,4 @@
-//Cài đặt chome: settings -> experiments -> Show warning about Self-XSS when pasting code
+//Tắt cài đặt chome: settings -> experiments -> Show warning about Self-XSS when pasting code
 
 let reason = 'Sản lượng hàng tăng, nhân sự thiếu chưa bổ sung, LVCC tạo BTP nên kho quá tải';
 let delayTime = 200;
